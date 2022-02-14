@@ -1,0 +1,313 @@
+<!--
+  StAuth10244: I Ishkhan Terzian, 001216827 certify that this material is my original work. No other person's work has been used without due acknowledgement. I have not made my work available to anyone else
+-->
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Google Map Array Of Markers Demo</title>
+  <style>
+    #map {
+      height: 500px;
+      width: 750px;
+    }
+
+    body {
+      background-color: bisque;
+    }
+
+    h1 {
+      text-align: center;
+      color: blueviolet;
+    }
+
+    h2 {
+      text-align: center;
+      color: darkcyan;
+    }
+
+    .flex-container {
+      display: flex;
+      text-align: center;
+    }
+
+    .flex-child {
+      flex: 1;
+      border: 2px solid black;
+      width: 50%;
+    }
+
+    .flex-child:first-child {
+      margin-right: 20px;
+    }
+
+
+    button {
+      margin-top: 2%;
+      font-size: 25px;
+      padding: 10px;
+      color: darkolivegreen;
+      border-radius: 10px;
+    }
+
+    #showVal {
+      color: darkblue;
+      margin-top: 0;
+      font-size: small;
+      padding: 10px;
+      border-radius: 10px;
+    }
+
+    #directionsPanel {
+      width: 400px;
+      height: 400px;
+      float: left;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Welcome to Hamilton's Museum and Gallery Finder!</h1>
+  <br><br>
+  <select id="scripts">
+    <option value="733 Mineral Springs Road, Hamilton, Ontario">Griffin House Gallery</option>
+    <option value="64 Sulphur Springs Road, Hamilton, Ontario">Fieldcote Museum House</option>
+    <option value="9280 Airport Road, Hamilton, Ontario">Canadian Warplane Museum</option>
+    <option value="610 York Boulevard, Hamilton, Ontario">Dundurn Gallery</option>
+    <option value="123 King Street West, Hamilton, Ontario">Hamilton Art Gallery</option>
+    <option value="64 Melrose Avenue North, Hamilton, Ontario">Canadian Football Museum</option>
+    <option value="741 Jackson Street West, Hamilton, Ontario">Whitehern Gallery</option>
+    <option value="1072 Main Street East, Hamilton, Ontario">Hamilton Children's Museum</option>
+    <option value="900 Woodward Avenue, Hamilton, Ontario">Hamilton Steam Museum</option>
+    <option value="77 King Street West, Ontario">Battlefield Museum</option>
+  </select>
+  <button id="showVal">Get Directions!</button>
+  <input type="hidden" id="display" />
+  </p>
+  </div>
+  <div class="flex-container">
+    <div class="flex-child">
+      <button id="museumButton">Show All Museum's</button>
+      <button id="gallerieButton">Show All Galleries</button>
+      <br>
+      <button id="reset">Reset</button>
+      <h2>Mark yourself on the map!</h2>
+      <button id="userLocation">Mark yourself!</button>
+      <br>
+      <h2>Enter your address:</h2>
+      <input type="text" id="address" size="50" style="font-size:22px;">
+      <br>
+      <button id="geoLocateText">Find me!</button>
+
+    </div>
+    <div class="flex-child">
+      <div id="map"></div>
+    </div>
+  </div>
+  <div id="directionsPanel"></div>
+
+
+  <br />
+  <script async
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCbsua4EskTMpwMIvO5vkvTgw35rhCwTfs&callback=initMap">
+  </script>
+  <script src="museums_galleries.js"></script>
+  <script>
+    var map;
+    var markers = [];
+    var sel = document.getElementById('scripts');
+    var el = document.getElementById('display');
+
+
+
+    function initMap() {
+      // Create a Google Map centered on Hamilton, Ontario 
+      map = new google.maps.Map(document.getElementById("map"), {
+        center: {
+          lat: 43.2557,
+          lng: -79.8711
+        },
+        zoom: 11,
+      });
+
+      geocoder = new google.maps.Geocoder();
+
+
+      // create the infowindow... we only create ONE infowindow and move it 
+      // around and set its content when a marker is clicked as need be.
+      infowindow = new google.maps.InfoWindow();
+
+      // when the marker is clicked, this function will run to open the 
+      // infowindow... the "this" keyword will refer to the marker/object 
+      // that was actually clicked... we'll use *that* to open the 
+      // infowindow at that marker's location, and we'll store the name 
+      // of each school in the "NAME" property of each marker object (each
+      // marker is ultimately a javascript object, we can set whatever keys
+      // we like...).
+      marker_clicked = function () {
+        infowindow.close(); // Close previously opened infowindow
+        connectionString = "<h3>" + this.NAME + "</h3>" +
+          "<pre>" +
+          "<p><b>Address:</b> </p>" + this.ADDRESS +
+          "<br><br>" +
+          "<a href=" + this.URL + ">Website" + "</a>" +
+          "</pre>";
+        infowindow.setContent(connectionString);
+        infowindow.open(map, this);
+      }
+
+      // put markers on the map for all the schools in education.js 
+      for (i = 0; i < museums_galleries.length; i++) {
+        if (museums_galleries[i].TYPE == "museum") {
+          new_icon = "http://maps.google.com/mapfiles/kml/pal4/icon8.png";
+        } else if (museums_galleries[i].TYPE == "gallerie") {
+          new_icon = "http://maps.google.com/mapfiles/kml/pal4/icon46.png";
+        }
+
+        // create the marker based on the array in the education.js file
+        new_marker = new google.maps.Marker({
+          position: {
+            lat: museums_galleries[i].LATITUDE,
+            lng: museums_galleries[i].LONGITUDE
+          },
+          title: museums_galleries[i].NAME,
+          icon: new_icon
+        });
+
+        // put the marker onto the map (it will not appear otherwise)
+        new_marker.setMap(map);
+
+        // store the name of the school as a property of the marker object
+        new_marker.NAME = museums_galleries[i].NAME;
+        new_marker.ADDRESS = museums_galleries[i].ADDRESS;
+        new_marker.URL = museums_galleries[i].URL;
+        new_marker.TYPE = museums_galleries[i].TYPE;
+
+
+        // have the info window open when the marker is clicked...
+        new_marker.addListener('click', marker_clicked);
+
+        markers.push(new_marker);
+      }
+    }
+
+    function filterMuseums() {
+      for (i = 0; i < markers.length; i++) {
+        if (markers[i].TYPE == "museum") {
+          markers[i].setMap(map);
+        } else {
+          markers[i].setMap(null);
+        }
+      }
+    }
+
+    document.getElementById("museumButton").onclick = filterMuseums;
+
+    function filterGallerie() {
+      for (i = 0; i < markers.length; i++) {
+        if (markers[i].TYPE == "gallerie") {
+          markers[i].setMap(map);
+        } else {
+          markers[i].setMap(null);
+        }
+      }
+    }
+
+    document.getElementById("gallerieButton").onclick = filterGallerie;
+
+    function reset() {
+      for (i = 0; i < markers.length; i++) markers[i].setMap(map);
+    }
+
+    document.getElementById("reset").onclick = reset;
+
+    var currentLocation;
+
+    function showPositionOnMap(position) {
+      // create a marker centered at the user's location
+      user_location = new google.maps.Marker({
+        position: {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        },
+        title: "Your Location", // will appear when we hover over the marker
+        // We use a custom marker:
+        //   https://developers.google.com/maps/documentation/javascript/custom-markers
+        // A list of icons we can use is found here:
+        //   http://kml4earth.appspot.com/icons.html
+        icon: "http://maps.google.com/mapfiles/kml/pal3/icon48.png"
+      });
+
+      // put the marker onto the map (it will not appear otherwise)
+      user_location.setMap(map);
+      currentLocation = "[" + user_location.position.lat + ", " + user_location.position.lng + "]";
+    }
+
+    // call showPositionOnMap after finding the user's current location
+    document.getElementById("userLocation").onclick = function () {
+      navigator.geolocation.getCurrentPosition(showPositionOnMap);
+    }
+
+    function codeAddress() {
+      var address = document.getElementById('address').value;
+      new_icon = "http://maps.google.com/mapfiles/kml/pal3/icon48.png";
+
+      // perform geocoding for the address entered into the input textbox, a 
+      // callback function is given the latitude and longitude as an an 
+      // argument as part of a results object..
+      geocoder.geocode({
+        'address': address
+      }, function (results, status) {
+        if (status == 'OK') {
+          // put a marker on the map at the given position
+          var marker = new google.maps.Marker({
+            map: map,
+            position: results[0].geometry.location,
+            icon: new_icon
+          });
+        } else {
+          alert('Geocode was not successful for the following reason: ' + status);
+        }
+      });
+    }
+
+    // call the codeAddress function when the geolocate button is clicked
+    document.getElementById("geoLocateText").onclick = codeAddress;
+
+    var endDestination;
+    // assign onclick handlers to the buttons
+    document.getElementById('showVal').onclick = function () {
+      el.value = sel.value;
+      endDestination = el.value;
+      getDirections(endDestination)
+    }
+
+
+    function getDirections(endDestination) {
+      document.getElementById("directionsPanel").innerHTML = "";
+      // services used to provide directions
+      directionsService = new google.maps.DirectionsService();
+      directionsRenderer = new google.maps.DirectionsRenderer();
+
+      directionsRenderer.setMap(map);
+
+      // setup a basic directions request with origin, destination, travel mode,
+      // there are MANY more possible options here
+      request = {
+        origin: "" + currentLocation + ", Hamilton, Ontario",
+        destination: endDestination,
+        travelMode: 'BICYCLING'
+      };
+      // use the directions service and directions renderer to render the 
+      // directions on the map
+      directionsService.route(request, function (result, status) {
+        if (status == 'OK') {
+          directionsRenderer.setDirections(result);
+          directionsRenderer.setPanel(document.getElementById("directionsPanel"))
+        }
+      });
+    }
+  </script>
+</body>
+
+</html>

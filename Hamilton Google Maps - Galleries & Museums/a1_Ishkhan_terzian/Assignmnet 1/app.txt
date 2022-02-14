@@ -1,0 +1,12 @@
+/*
+  StAuth10244: I Ishkhan Terzian, 001216827 certify that this material is my original work. No other person's work has been used without due acknowledgement. I have not made my work available to anyone else
+*/
+
+This website incorporates an interactive Google Map, where special markers are placed
+to indicate Hamilton's Museums and Galleries across the region.
+
+Buttons are layed out to find the users geolocation on the map as well as a drop down menu
+to find the direction distance from the users current location to the end distance.
+
+A direction panel is incorported once the user decides where the they want to travel to.
+Direction panel uses the biclying feature.
